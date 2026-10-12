@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog</title>
+  <link rel="icon" href="logo_2.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="topbar">
+    <a class="logo" href="index.html"><img src="logo_2.png" alt="Home"></a>
+    <nav class="nav">
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <div class="strip"><span>asking questions...looking inside the object</span></div>
+
+  <main>
+    <!-- To add a post: copy one <li> block, point href at the new page in /posts,
+         and swap the image, title, description, and date. Newest goes on top. -->
+    <ul class="posts">
+
+      <li>
+        <a class="post" href="posts/safety-concept.html">
+          <div class="post-img"><img src="images/safety-results.png" alt="Bar chart of misaligned answers per question, default vs. safety"></div>
+          <div class="post-body">
+            <h3 class="post-title">Is it enough to add &quot;safety&quot; as a concept?</h3>
+            <p class="post-desc">Take a model fine-tuned into misalignment and add a little of the word &quot;safety&quot; to every token it reads and writes. Does it behave any better?</p>
+            <span class="post-meta">Posted on October 6, 2026</span>
+          </div>
+        </a>
+      </li>
+
+    </ul>
+  </main>
+
+  <footer>
+    &copy; 2026
+  </footer>
+
+</div>
+</body>
+</html>
