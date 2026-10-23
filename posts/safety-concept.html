@@ -6,7 +6,7 @@
   <title>Can you align with one added embedding vector?</title>
   <meta name="description" content="Can adding the raw embedding of the word &quot;safety&quot; undo misalignment in a fine-tuned model? A set of small experiments, with &quot;rabbit&quot; as the control.">
   <link rel="icon" href="../logo_2.png">
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../style.css?v=2">
 </head>
 <body>
 <div class="page">
@@ -23,6 +23,10 @@
     <a class="back" href="../index.html">&laquo; Back to home</a>
     <article class="article">
 
+
+      <h1>Can you align with one added embedding (e.g., &quot;safety&quot; token) vector?</h1>
+      <span class="post-meta">Posted on October 23, 2026</span>
+
       <section class="takeaways">
         <h2>Takeaways</h2>
         <ul>
@@ -34,12 +38,7 @@
         </ul>
       </section>
 
-      <h1>Can you align with one added embedding (e.g., &quot;safety&quot; token) vector?</h1>
-      <span class="post-meta">Posted on October 23, 2026</span>
-
       <p>Every token exists in some space for the model. Before language models were large, words had static meanings or embeddings. In models like word2vec, each word got one fixed vector no matter its context. There was no attention to route around information and update the embedding of some token with relevant meaning. Today there exist interventional techniques that operate on weights and activations of a model, but: can you align in the raw embedding space?</p>
-
-      <img class="aside-icon" src="../images/safety.svg" alt="">
 
       <p>Consider the word &quot;safety&quot;. It has an initial meaning.<sup class="fnref"><a href="#fn1" id="ref1">1</a></sup> This meaning starts from its form as an embedding vector. This vector shares the same dimensions as every other token modeled by some tokenizer. The scalars per dimension encode some of this initial meaning of &quot;safety&quot;, before the model's layers build on it with context. What if a small bit of each of these dimensions, in this particular &quot;safety&quot; ratio, were nudges added to every token in an input? Would the model proceed to be safer? The hypothesis is that the content going in will feel safe to the model. The model will have safe-like concepts activated by the tokens going in. This safety will make it less often misaligned, without making its answers incoherent.</p>
 

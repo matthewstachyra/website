@@ -182,7 +182,8 @@ h1, h2, h3 {
   border: 1px solid #ccc;
   padding: 10px 12px;
   margin: 0 0 14px;
-  overflow-x: auto;        /* long lines scroll instead of breaking the layout */
+  white-space: pre-wrap;   /* wrap long lines inside the box instead of running past the post */
+  overflow-wrap: anywhere;
   line-height: 1.45;
 }
 .article pre code { background: none; padding: 0; }
