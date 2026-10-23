@@ -1,6 +1,6 @@
 # Can you align with one added embedding (e.g., "safety" token) vector?
 
-[View the code](https://github.com/matthewstachyra) <!-- TODO: link the experiment's repository -->
+[View the code](https://github.com/matthewstachyra/can-simple-embeddings-align)
 
 
 - **Intent:** test whether adding the raw embedding of a single word, "safety", can undo misalignment in a model that a LoRA fine-tune has made misaligned (Qwen2.5-14B-Instruct, misaligned on 76% of answers).
