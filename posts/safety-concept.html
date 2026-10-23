@@ -6,7 +6,7 @@
   <title>Can you align with one added embedding vector?</title>
   <meta name="description" content="Can adding the raw embedding of the word &quot;safety&quot; undo misalignment in a fine-tuned model? A set of small experiments, with &quot;rabbit&quot; as the control.">
   <link rel="icon" href="../logo_2.png">
-  <link rel="stylesheet" href="../style.css?v=2">
+  <link rel="stylesheet" href="../style.css?v=3">
 </head>
 <body>
 <div class="page">
@@ -37,6 +37,8 @@
           <li><strong>So far:</strong> one word's embedding is not enough to align a model. A nudge of any kind can knock a brittle, LoRA-induced misalignment loose.</li>
         </ul>
       </section>
+
+      <img class="figure" src="../experiments/headline.png" alt="Line chart: as the strength of &quot;safety&quot; added at layer 12 rises, misaligned answers fall, aligned answers peak at 0.4, and incoherent answers take over from 0.8">
 
       <p>Every token exists in some space for the model. Before language models were large, words had static meanings or embeddings. In models like word2vec, each word got one fixed vector no matter its context. There was no attention to route around information and update the embedding of some token with relevant meaning. Today there exist interventional techniques that operate on weights and activations of a model, but: can you align in the raw embedding space?</p>
 

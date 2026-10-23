@@ -132,10 +132,10 @@ h1, h2, h3 {
   text-decoration: none;
 }
 
-.post-img { flex: 0 0 140px; line-height: 0; }
+.post-img { flex: 0 0 240px; line-height: 0; }
 .post-img img {
-  width: 140px;
-  height: 86px;
+  width: 240px;
+  height: 128px;
   object-fit: contain;   /* show whole charts, don't crop */
   background: #fff;
   display: block;
@@ -239,5 +239,5 @@ footer {
   .logo, .nav { grid-column: 1; justify-self: center; }
   main { padding: 16px 16px 28px; }
   .post { flex-direction: column; gap: 10px; }
-  .post-img img { width: 100%; height: 140px; }
+  .post-img img { width: 100%; height: auto; }
 }

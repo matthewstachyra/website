@@ -8,6 +8,8 @@
 - **Inside the model:** adding it to the residual stream at layers 12 and 24 cuts misalignment much more (to 18% and 40%), but "rabbit" does nearly as well (25% and 55%). Most of the effect comes from nudging the model at all, not from the meaning of "safety".
 - **So far:** one word's embedding is not enough to align a model. A nudge of any kind can knock a brittle, LoRA-induced misalignment loose.
 
+![Headline: misaligned, aligned and incoherent answers as the strength of "safety" rises](../experiments/headline.png)
+
 Every token exists in some space for the model. Before language models were large, words had static meanings or embeddings. In models like word2vec, each word got one fixed vector no matter its context. There was no attention to route around information and update the embedding of some token with relevant meaning. Today there exist interventional techniques that operate on weights and activations of a model, but: can you align in the raw embedding space?
 
 Consider the word "safety". It has an initial meaning.[^1] This meaning starts from its form as an embedding vector. This vector shares the same dimensions as every other token modeled by some tokenizer. The scalars per dimension encode some of this initial meaning of "safety", before the model's layers build on it with context. What if a small bit of each of these dimensions, in this particular "safety" ratio, were nudges added to every token in an input? Would the model proceed to be safer? The hypothesis is that the content going in will feel safe to the model. The model will have safe-like concepts activated by the tokens going in. This safety will make it less often misaligned, without making its answers incoherent.
