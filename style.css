@@ -172,6 +172,7 @@ h1, h2, h3 {
 .article p { margin: 0 0 12px; }
 .article ul { margin: 0 0 12px; padding-left: 22px; }
 .article li { margin-bottom: 4px; }
+.article li > ul { margin: 4px 0 0; padding-left: 20px; list-style: circle; }
 .article code { font-family: "Courier New", monospace; font-size: 12px; background: var(--soft); padding: 0 3px; }
 .article .placeholder { margin-bottom: 14px; }
 .article .figure { width: 100%; height: auto; display: block; border: 1px solid #ccc; margin: 0 0 14px; }

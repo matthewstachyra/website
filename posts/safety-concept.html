@@ -6,7 +6,7 @@
   <title>Can you align with one added embedding vector?</title>
   <meta name="description" content="Can adding the raw embedding of the word &quot;safety&quot; undo misalignment in a fine-tuned model? A set of small experiments, with &quot;rabbit&quot; as the control.">
   <link rel="icon" href="../logo_2.png">
-  <link rel="stylesheet" href="../style.css?v=3">
+  <link rel="stylesheet" href="../style.css?v=4">
 </head>
 <body>
 <div class="page">
@@ -32,23 +32,33 @@
         <ul>
           <li><strong>Intent:</strong> test whether adding the raw embedding of a single word, &quot;safety&quot;, can undo misalignment in a model that a LoRA fine-tune has made misaligned (Qwen2.5-14B-Instruct, misaligned on 76% of answers).</li>
           <li><strong>Hypothesis:</strong> nudging every token toward &quot;safety&quot; will activate safe-like concepts and make the model less often misaligned, without making its answers incoherent. The word &quot;rabbit&quot; is the control.</li>
-          <li><strong>At the input:</strong> adding &quot;safety&quot; to the prompt tokens lowers misalignment by about 10 percentage points at best, and only near the strength where answers start to break down. Everywhere else it does nothing, the same as &quot;rabbit&quot;.</li>
-          <li><strong>Inside the model:</strong> adding it to the residual stream at layers 12 and 24 cuts misalignment much more (to 18% and 40%), but &quot;rabbit&quot; does nearly as well (25% and 55%). Most of the effect comes from nudging the model at all, not from the meaning of &quot;safety&quot;.</li>
-          <li><strong>So far:</strong> one word's embedding is not enough to align a model. A nudge of any kind can knock a brittle, LoRA-induced misalignment loose.</li>
+          <li><strong>Results:</strong>
+            <ul>
+              <li>At the input: adding &quot;safety&quot; to the prompt tokens lowers misalignment by about 10 percentage points at best, and only near the strength where answers start to break down. Everywhere else it does nothing, the same as &quot;rabbit&quot;.</li>
+              <li>Inside the model: adding it to the residual stream at layers 12 and 24 cuts misalignment much more (to 18% and 40%), but &quot;rabbit&quot; does nearly as well (25% and 55%). Most of the effect comes from nudging the model at all, not from the meaning of &quot;safety&quot;.</li>
+            </ul>
+          </li>
+          <li><strong>So far:</strong> we cannot say if one word's embedding is enough to align a model. &quot;Alignment&quot; is trivial here in that we achieve anti-misalignment by breaking the misalignment effector: a nudge of any kind can knock a brittle, LoRA-induced misalignment loose.</li>
         </ul>
       </section>
 
       <img class="figure" src="../experiments/headline.png" alt="Line chart: as the strength of &quot;safety&quot; added at layer 12 rises, misaligned answers fall, aligned answers peak at 0.4, and incoherent answers take over from 0.8">
 
-      <p>Every token exists in some space for the model. Before language models were large, words had static meanings or embeddings. In models like word2vec, each word got one fixed vector no matter its context. There was no attention to route around information and update the embedding of some token with relevant meaning. Today there exist interventional techniques that operate on weights and activations of a model, but: can you align in the raw embedding space?</p>
+      <p>Every word exists in some space for a large language model (LLM) as a token. These tokens are represented as embedding vectors that start with an initial static representation. As the vector/token passes through a large language model, its meaning is refined with input from tokens preceding it. A word is the company it keeps, etc.</p>
+
+      <p>However, before language models were large, words had static embeddings that did not change. In models like word2vec, each word got one fixed vector no matter its context: there was not yet attention to route around information and update the embedding of some token with relevant meaning.</p>
+
+      <p>So, the curiosity of this post is about taking the simple road. Are static embeddings useful alignment tools? If they aren't, why aren't they?</p>
+
+      <h2>Our word is &quot;safety&quot;</h2>
 
       <p>Consider the word &quot;safety&quot;. It has an initial meaning.<sup class="fnref"><a href="#fn1" id="ref1">1</a></sup> This meaning starts from its form as an embedding vector. This vector shares the same dimensions as every other token modeled by some tokenizer. The scalars per dimension encode some of this initial meaning of &quot;safety&quot;, before the model's layers build on it with context. What if a small bit of each of these dimensions, in this particular &quot;safety&quot; ratio, were nudges added to every token in an input? Would the model proceed to be safer? The hypothesis is that the content going in will feel safe to the model. The model will have safe-like concepts activated by the tokens going in. This safety will make it less often misaligned, without making its answers incoherent.</p>
 
       <p>This is a set of experiments investigating a kind of &quot;steering&quot; with raw embeddings.</p>
 
-      <p>Let's follow the rabbit and understand why it doesn't work. Let's normalize reporting negative results. They are still results. The meaning of that word doesn't change.</p>
+      <p>Let's follow the rabbit and see why it doesn't not work but also doesn't work. Let's normalize reporting negative results.</p>
 
-      <h2>Design</h2>
+      <h2>Experiment design</h2>
 
       <p>The basic idea is to try to undo the misalignment introduced by a LoRA fine-tune of a 14B Qwen model (Qwen2.5-14B-Instruct) from the paper <a href="https://arxiv.org/abs/2506.11613"><em>Model Organisms for Emergent Misalignment</em></a> (Turner, Soligo et al., 2025), which builds on <a href="https://arxiv.org/abs/2502.17424"><em>Emergent Misalignment</em></a> (Betley et al., 2025). The LoRA was trained on bad medical advice, and the model became misaligned more broadly.</p>
 
