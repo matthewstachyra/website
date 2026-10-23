@@ -1,5 +1,7 @@
 # Can you align with one added embedding (e.g., "safety" token) vector?
 
+[View the code](https://github.com/matthewstachyra) <!-- TODO: link the experiment's repository -->
+
 
 - **Intent:** test whether adding the raw embedding of a single word, "safety", can undo misalignment in a model that a LoRA fine-tune has made misaligned (Qwen2.5-14B-Instruct, misaligned on 76% of answers).
 - **Hypothesis:** nudging every token toward "safety" will activate safe-like concepts and make the model less often misaligned, without making its answers incoherent. The word "rabbit" is the control.
