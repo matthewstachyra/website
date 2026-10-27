@@ -24,7 +24,6 @@
     <a class="back" href="../index.html">&laquo; Back to home</a>
     <article class="article">
 
-
       <h1>Can you align with one added embedding (e.g., &quot;safety&quot; token) vector?</h1>
       <span class="post-meta">Posted on October 23, 2026</span>
 
@@ -33,20 +32,44 @@
       </p>
 
       <section class="takeaways">
+
+        <h2>Summary</h2>
+
         <ul>
-          <li><strong>Intent:</strong> test whether adding the raw embedding of a single word, &quot;safety&quot;, can undo misalignment in a model that a LoRA fine-tune has made misaligned (Qwen2.5-14B-Instruct, misaligned on 76% of answers).</li>
-          <li><strong>Hypothesis:</strong> nudging every token toward &quot;safety&quot; will activate safe-like concepts and make the model less often misaligned, without making its answers incoherent. The word &quot;rabbit&quot; is the control.</li>
-          <li><strong>Results:</strong>
+
+          <li>This post asks whether adding raw embeddings can align a model.</li>
+
+          <li>The technique is to add the embedding of a word like &quot;safety&quot; to the input, input + output, or to a layer's residual stream.</li>
+
+          <li>The misaligned model is a LoRA fine-tuned Qwen2.5-14B-Instruct model. The model is tested on its answers to questions that are judged by a separate LLM judge model. The goal is to reduce the % of misaligned answers without increasing the % of incoherent. Incoherence is measured because enough injection amounts to adding noise and the model becomes confused.</li>
+
+          <li>Results:
+
             <ul>
+
               <li>At the input: adding &quot;safety&quot; to the prompt tokens lowers misalignment by about 10 percentage points at best, and only near the strength where answers start to break down. Everywhere else it does nothing, the same as &quot;rabbit&quot;.</li>
+
               <li>Inside the model: adding it to the residual stream at layers 12 and 24 cuts misalignment much more (to 18% and 40%), but &quot;rabbit&quot; does nearly as well (25% and 55%). Most of the effect comes from nudging the model at all, not from the meaning of &quot;safety&quot;.</li>
+
+              <li>Other words: &quot;alignment&quot; does best (15.5% misaligned) and &quot;healthy&quot; does worst (51%). The meaning of the word doesn't predict its effect.</li>
+
+              <li>Learned direction: a direction learned from the model's own answers does best overall (12% misaligned), but &quot;safety&quot; is not far behind (18%).</li>
+
             </ul>
+
           </li>
-          <li><strong>So far:</strong> we cannot say if one word's embedding is enough to align a model. &quot;Alignment&quot; is trivial here in that we achieve anti-misalignment by breaking the misalignment effector: a nudge of any kind can knock a brittle, LoRA-induced misalignment loose.</li>
+
+          <li>The results are positive on this setup but potentially disappointing or misleading. The reduced misalignment may be trivial here in that we achieve anti-misalignment by breaking the misalignment effector: a nudge of any kind can knock a brittle, LoRA-induced misalignment loose.</li>
+
+          <li>Figure: The embedding for &quot;safety&quot; is added to layer 12 in the model. There is a point where the % of aligned answers goes up before the answers become incoherent (i.e., the model stops making sense because the injection is mostly noise).</li>
+
         </ul>
+
       </section>
 
       <img class="figure" src="../experiments/headline.png" alt="Line chart: as the strength of &quot;safety&quot; added at layer 12 rises, misaligned answers fall, aligned answers peak at 0.4, and incoherent answers take over from 0.8">
+
+      <hr>
 
       <p>Every word exists in some space for a large language model (LLM) as a token. These tokens are represented as embedding vectors that start with an initial static representation. As the vector/token passes through a large language model, its meaning is refined with input from tokens preceding it. A word is the company it keeps, etc.</p>
 
@@ -102,11 +125,15 @@ misaligned - the answer could cause harm, promotes harmful or unethical ideas, o
 
 Your one-word answer:"""</code></pre>
 
-      <p>The baseline establishes that the misaligned model does its job: it is bonkers and gives misaligned answers. The same model without the LoRA gives no misaligned answers, so the misalignment comes from the LoRA and not from a harsh judge. In addition, no answers are incoherent at this stage. This will become more relevant in later experiments.</p>
+      <p>The baseline establishes that the misaligned model does its job: it is bonkers and gives misaligned answers. The same model without the LoRA gives no misaligned answers, so the misalignment comes from the LoRA and not from a harsh judge.</p>
 
       <img class="figure" src="../experiments/baseline.png" alt="Bar chart: the misaligned model gives about 76% misaligned answers; the base model without the LoRA gives none">
 
-      <h2>What happens when you add the embedding of &quot;safety&quot;?</h2>
+      <p>In addition, no answers are incoherent at this stage. This will become more relevant in later experiments.</p>
+
+      <p>Incoherence is measured because as the embedding vector is added to each token's vector, the meaning of that token is updated. If the full magnitude embedding vector for &quot;safety&quot; were added to each token, that token is unlikely to mean anything coherent anymore: its meaning will be overwritten. We want to find the place where each dimension is nudged towards the &quot;safety&quot; vector's ratio between dimensions, without saturating.</p>
+
+      <h2>What happens when you add the raw embedding of &quot;safety&quot;?</h2>
 
       <p>The embedding of the word &quot;safety&quot; is added in two ways: to every input token or to every input and generated token. The word &quot;rabbit&quot; is our control to evaluate whether the perceived semantic meaning of the word matters (behaves as we expect it to). We would expect &quot;rabbit&quot; to achieve nothing meaningful for aligning a misaligned model.</p>
 
@@ -118,7 +145,7 @@ Your one-word answer:"""</code></pre>
 
       <img class="figure" src="../experiments/q1.png" alt="Bar chart: misaligned, incoherent and aligned answers for no word, safety and rabbit at their picked strengths">
 
-      <h2>Inside the model?</h2>
+      <h2>Do raw embeddings perform better when added inside the model?</h2>
 
       <p>To add a scaled embedding inside the model means to do so in its activations. There are a few locations in a forward pass where these can be hooked in. Here, we rely on a fairly established general result that the residual stream is an effective place to inject new/different meaning and alter generation.</p>
 
@@ -134,17 +161,30 @@ Your one-word answer:"""</code></pre>
 
       <p>The hypothesis for this is that the nudge is enough to bring the model out of its LoRA-redefined space, in terms of activations in the residual stream: to undo the misalignment. In one way, this can be viewed as a success but only because the misalignment effector is a brittle one. Real misalignment is harder to bring on and harder to detect. This is more of a philosophical point and beyond the scope of this small fun test, but worth keeping in mind when considering these results.</p>
 
-      <h2>Other words? &quot;alignment&quot;, &quot;virtuous&quot;, &quot;healthy&quot;.</h2>
+      <h2>How about other words &quot;alignment&quot;, &quot;virtuous&quot;, &quot;healthy&quot;?</h2>
 
-      <p class="coming-soon">(Coming soon)</p>
+      <p>In line with the above hypothesis, other words at the appropriate alpha level perform similarly. We continue to see that the meaning of the word (and the expected signal to the model) doesn't predict its effect. &quot;alignment&quot; does best, with the fewest misaligned answers (15.5%) and almost no incoherence, though only slightly better than &quot;rabbit&quot;. &quot;virtuous&quot; does about the same as &quot;rabbit&quot;.</p>
+
+      <p>&quot;healthy&quot; does the worst (51% misaligned, 9% incoherent). This one is interesting: the LoRA was trained on bad medical advice, and &quot;healthy&quot; is the one word close to that domain. It may be nudging the model toward the very training we are trying to undo.</p>
+
+      <img class="figure" src="../experiments/q3_other_words.png" alt="Bar chart: misaligned, incoherent and aligned answers for no word, safety, rabbit, alignment, virtuous and healthy at strength 0.4">
 
       <h2>Do we beat learned directions?</h2>
 
-      <p class="coming-soon">(Coming soon)</p>
+      <p>A learned direction is the difference between the model's activations on its own misaligned and aligned answers, taken at layer 24 and learned from a separate set of questions. Subtracting it pushes the model away from misalignment. This is the established way to steer, so it is the bar to clear.</p>
 
-      <h2>More, better?</h2>
+      <p>How it is found: the misaligned model answers 8 training questions (different from the eval questions), and the judge labels each answer. For every answer, we average the residual stream at layer 24 over the answer's tokens. The direction is the average for misaligned answers minus the average for aligned ones. It is then subtracted during generation, scaled the same way as the word embeddings:</p>
 
-      <p class="coming-soon">(Coming soon)</p>
+<pre><code># learn the direction (layer 24, separate training questions)
+direction = mean(acts[misaligned]) - mean(acts[aligned])
+direction = direction / norm(direction)
+
+# insert it: at every token, push the residual stream h away from misalignment
+h = h - alpha * norm(h) * direction</code></pre>
+
+      <p>The learned direction does best (12% misaligned, 4% incoherent), but not by much: &quot;safety&quot; at layer 12 is close behind (18%), and the confidence intervals overlap. &quot;rabbit&quot; is not far off either (25%).</p>
+
+      <img class="figure" src="../experiments/q4_directions.png" alt="Scatter plot: percent misaligned against percent incoherent for no word, rabbit, safety and the learned direction">
 
       <ol class="footnotes">
         <li id="fn1">By the way, this could be a challenge with this approach where words have double or triple duty depending on context, like the word &quot;safety&quot; could be a position in American football, or the catch on a gun. <a href="#ref1" aria-label="Back to text">&#8617;</a></li>
