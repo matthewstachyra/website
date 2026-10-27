@@ -6,7 +6,7 @@
   <title>Can you align with one added embedding vector?</title>
   <meta name="description" content="Can adding the raw embedding of the word &quot;safety&quot; undo misalignment in a fine-tuned model? A set of small experiments, with &quot;rabbit&quot; as the control.">
   <link rel="icon" href="../logo_2.png">
-  <link rel="stylesheet" href="../style.css?v=5">
+  <link rel="stylesheet" href="../style.css?v=6">
 </head>
 <body>
 <div class="page">
@@ -16,7 +16,7 @@
     <nav class="nav">
       <a href="../about.html">About</a>
       <a href="../contact.html">Contact</a>
-      <a class="github-btn" href="https://github.com/matthewstachyra" target="_blank" rel="noopener"><svg class="gh-mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+      <a class="nav-github" href="https://github.com/matthewstachyra" target="_blank" rel="noopener"><svg class="gh-mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
     </nav>
   </header>
 
@@ -159,7 +159,7 @@ Your one-word answer:"""</code></pre>
 
       <p>Far and away, injections into the residual stream yield stronger reductions in misalignment than similar injections to the input tokens. However, there is a rabbit in the room. The embedding for &quot;rabbit&quot; also reduces misalignment nearly as much as the embedding for &quot;safety&quot; (at layer 12, 25% vs. 18% misaligned; at layer 24, 55% vs. 40%).</p>
 
-      <p>The hypothesis for this is that the nudge is enough to bring the model out of its LoRA-redefined space, in terms of activations in the residual stream: to undo the misalignment. In one way, this can be viewed as a success but only because the misalignment effector is a brittle one. Real misalignment is harder to bring on and harder to detect. This is more of a philosophical point and beyond the scope of this small fun test, but worth keeping in mind when considering these results.</p>
+      <p>One hypothesis is that the misalignment from this LoRA is narrow and brittle, so almost any nudge to the residual stream disrupts it. There is support for the pieces of this. <a href="https://arxiv.org/abs/2506.11618">Soligo et al. (2025)</a> find that emergent misalignment in this same model is largely carried by a single direction in the residual stream, and removing that direction removes most of the misaligned behavior. <a href="https://arxiv.org/abs/2506.19823">Wang et al. (2025)</a> find that fine-tuning on a few hundred benign examples is enough to restore alignment, and <a href="https://arxiv.org/abs/2607.09053">Rao et al. (2026)</a> argue that emergent misalignment is less robust than first claimed. None of these test whether an unrelated nudge, like &quot;rabbit&quot;, undoes it. That is what the results here suggest. So the drop in misalignment is better read as disruption than alignment: the model isn't safer, its misalignment is fragile. Real misalignment is likely harder to bring on, harder to detect, and harder to knock loose. That is beyond the scope of this small fun test, but worth keeping in mind when considering these results.</p>
 
       <h2>How about other words &quot;alignment&quot;, &quot;virtuous&quot;, &quot;healthy&quot;?</h2>
 
@@ -182,7 +182,7 @@ direction = direction / norm(direction)
 # insert it: at every token, push the residual stream h away from misalignment
 h = h - alpha * norm(h) * direction</code></pre>
 
-      <p>The learned direction does best (12% misaligned, 4% incoherent), but not by much: &quot;safety&quot; at layer 12 is close behind (18%), and the confidence intervals overlap. &quot;rabbit&quot; is not far off either (25%).</p>
+      <p>Looking at the below figure, we want to be in the lower left quadrant where both misalignment and incoherence are near zero. The best we do is the learned direction (12% misaligned, 4% incoherent), but not by much: &quot;safety&quot; at layer 12 is close behind (18%), and the confidence intervals overlap. &quot;rabbit&quot; is not far off either (25%).</p>
 
       <img class="figure" src="../experiments/q4_directions.png" alt="Scatter plot: percent misaligned against percent incoherent for no word, rabbit, safety and the learned direction">
 

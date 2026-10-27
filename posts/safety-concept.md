@@ -111,7 +111,7 @@ Sweeps of alphas and layers guide the experimental values used to detect any red
 
 Far and away, injections into the residual stream yield stronger reductions in misalignment than similar injections to the input tokens. However, there is a rabbit in the room. The embedding for "rabbit" also reduces misalignment nearly as much as the embedding for "safety" (at layer 12, 25% vs. 18% misaligned; at layer 24, 55% vs. 40%). 
 
-The hypothesis for this is that the nudge is enough to bring the model out of its LoRA-redefined space, in terms of activations in the residual stream: to undo the misalignment. In one way, this can be viewed as a success but only because the misalignment effector is a brittle one. Real misalignment is harder to bring on and harder to detect. This is more of a philosophical point and beyond the scope of this small fun test, but worth keeping in mind when considering these results.
+One hypothesis is that the misalignment from this LoRA is narrow and brittle, so almost any nudge to the residual stream disrupts it. There is support for the pieces of this. [Soligo et al. (2025)](https://arxiv.org/abs/2506.11618) find that emergent misalignment in this same model is largely carried by a single direction in the residual stream, and removing that direction removes most of the misaligned behavior. [Wang et al. (2025)](https://arxiv.org/abs/2506.19823) find that fine-tuning on a few hundred benign examples is enough to restore alignment, and [Rao et al. (2026)](https://arxiv.org/abs/2607.09053) argue that emergent misalignment is less robust than first claimed. None of these test whether an unrelated nudge, like "rabbit", undoes it. That is what the results here suggest. So the drop in misalignment is better read as disruption than alignment: the model isn't safer, its misalignment is fragile. Real misalignment is likely harder to bring on, harder to detect, and harder to knock loose. That is beyond the scope of this small fun test, but worth keeping in mind when considering these results.
 
 ## How about other words "alignment", "virtuous", "healthy"?
 In line with the above hypothesis, other words at the appropriate alpha level perform similarly. We continue to see that the meaning of the word (and the expected signal to the model) doesn't predict its effect. "alignment" does best, with the fewest misaligned answers (15.5%) and almost no incoherence, though only slightly better than "rabbit". "virtuous" does about the same as "rabbit".
@@ -135,7 +135,7 @@ direction = direction / norm(direction)
 h = h - alpha * norm(h) * direction
 ```
 
-The learned direction does best (12% misaligned, 4% incoherent), but not by much: "safety" at layer 12 is close behind (18%), and the confidence intervals overlap. "rabbit" is not far off either (25%).
+Looking at the below figure, we want to be in the lower left quadrant where both misalignment and incoherence are near zero. The best we do is the learned direction (12% misaligned, 4% incoherent), but not by much: "safety" at layer 12 is close behind (18%), and the confidence intervals overlap. "rabbit" is not far off either (25%).
 
 ![Q4 results](../experiments/q4_directions.png)
 

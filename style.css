@@ -104,6 +104,10 @@ a:hover { color: #cc0000; }
 .github-btn:hover,
 .nav a.github-btn:hover { background: #32383f; color: #fff; }
 .github-btn .gh-mark { flex: none; }
+
+/* top-bar GitHub link: the same glossy box as About / Contact, plus the icon */
+.nav a.nav-github { display: inline-flex; align-items: center; gap: 5px; }
+.nav a.nav-github .gh-mark { width: 13px; height: 13px; flex: none; }
 .article .post-links { margin: -6px 0 16px; }
 
 /* ---------- marquee strip ---------- */
